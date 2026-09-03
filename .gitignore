@@ -1,0 +1,5 @@
+covertage.*
+.idea
+bin/
+logs/
+HANDOFF.md
