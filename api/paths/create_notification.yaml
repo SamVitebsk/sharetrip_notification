@@ -1,0 +1,23 @@
+post:
+  summary: Создать уведомление
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../openapi.yaml#/components/schemas/CreateNotificationRequest"
+  responses:
+    '201':
+      description: Уведомление успешно создано
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/NotificationResponse"
+    '400':
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/ErrorResponse"
+    '500':
+      description: Внутренняя ошибка сервера

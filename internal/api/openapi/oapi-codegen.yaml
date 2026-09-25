@@ -1,0 +1,9 @@
+package: openapi
+generate:
+  models: true
+  fiber-server: true
+output: internal/api/openapi/openapi.gen.go
+output-options:
+  skip-prune: true
+import-mapping:
+  ../openapi.yaml: "-"

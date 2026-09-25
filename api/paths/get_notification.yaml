@@ -1,0 +1,19 @@
+get:
+  summary: Получить уведомление
+  parameters:
+    - $ref: "../openapi.yaml#/components/parameters/NotificationId"
+  responses:
+    '200':
+      description: Уведомление найдено
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/NotificationResponse"
+    '404':
+      description: Уведомление не найдено
+      content:
+        application/json:
+          schema:
+            $ref: "../openapi.yaml#/components/schemas/ErrorResponse"
+    '500':
+      description: Внутренняя ошибка сервера

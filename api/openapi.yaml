@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: ShareTrip Notification Service
+  version: 1.0.0
+paths:
+  /notifications:
+    $ref: "./paths/create_notification.yaml"
+  /notifications/{id}:
+    $ref: "./paths/get_notification.yaml"
+
+components:
+  parameters:
+    NotificationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^\s*\S.*$'
+  schemas:
+    CreateNotificationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - recipient_id
+        - type
+        - payload
+      properties:
+        recipient_id:
+          type: string
+        type:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+
+    NotificationResponse:
+      type: object
+      required:
+        - id
+        - recipient_id
+        - type
+        - status
+        - payload
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        recipient_id:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+
+
+    ErrorResponse:
+      required:
+        - error
+      type: object
+      properties:
+        error:
+          type: string
