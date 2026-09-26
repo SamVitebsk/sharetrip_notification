@@ -8,11 +8,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/joho/godotenv"
 	"time"
 
+	"github.com/joho/godotenv"
+	"golang.org/x/sync/errgroup"
+
 	"sharetrip_notification/internal/api"
+	"sharetrip_notification/internal/clients/kafka"
 	"sharetrip_notification/internal/env"
 	"sharetrip_notification/internal/repository"
 	"sharetrip_notification/internal/service"
@@ -70,7 +72,7 @@ func run() error {
 		return err
 	}
 
-	svc, err := service.New(pg)
+	svc, err := service.New(pg, pg.RunInTx)
 	if err != nil {
 		return err
 	}
@@ -94,17 +96,34 @@ func run() error {
 
 	api.RegisterRoutes(app, server)
 
-	serverErrors := make(chan error, 1)
-	go func() {
-		log.Printf("Starting notification service on :%d", serverPort)
-		serverErrors <- app.Listen(fmt.Sprintf(":%d", serverPort))
-	}()
+	kafkaCfg := kafka.LoadConfig()
+	consumer := kafka.NewConsumer(kafkaCfg.Brokers, kafkaCfg.Topic, kafkaCfg.GroupID)
+	defer consumer.Close()
 
-	select {
-	case err := <-serverErrors:
-		return err
-	case <-ctx.Done():
-		log.Println("Shutting down gracefully...")
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		log.Printf("Запуск сервиса уведомлений (HTTP) на порту :%d", serverPort)
+		if err := app.Listen(fmt.Sprintf(":%d", serverPort)); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		log.Printf("Запуск Kafka Consumer, слушаем топик: %s", kafkaCfg.Topic)
+		if err := consumer.Listen(gCtx, svc.ProcessTripPublished); err != nil {
+			log.Printf("Ошибка Kafka Consumer: %v", err)
+			return err
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		<-gCtx.Done()
+		log.Println("Плавное завершение работы сервиса (graceful shutdown)...")
 		return app.ShutdownWithTimeout(10 * time.Second)
-	}
+	})
+
+	return g.Wait()
 }

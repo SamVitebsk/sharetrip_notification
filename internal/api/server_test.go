@@ -82,7 +82,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Ошибка создания репозитория: %v", err)
 	}
 
-	srv, err := service.New(repoPg)
+	srv, err := service.New(repoPg, repoPg.RunInTx)
 	if err != nil {
 		log.Fatalf("Ошибка создания сервиса: %v", err)
 	}

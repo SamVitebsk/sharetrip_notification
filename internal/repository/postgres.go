@@ -23,7 +23,7 @@ func NewPostgres(pool *pgxpool.Pool) (*Postgres, error) {
 func ConnectPostgres(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("parse postgres config: %w", err)
+		return nil, fmt.Errorf("ошибка парсинга конфига postgres: %w", err)
 	}
 
 	const connectTimeout = 3 * time.Second
@@ -35,14 +35,14 @@ func ConnectPostgres(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
-		return nil, fmt.Errorf("create postgres pool: %w", err)
+		return nil, fmt.Errorf("ошибка создания пула соединений: %w", err)
 	}
 
 	pingCtx, cancel := context.WithTimeout(ctx, connectTimeout)
 	defer cancel()
 	if err := pool.Ping(pingCtx); err != nil {
 		pool.Close()
-		return nil, fmt.Errorf("ping postgres: %w", err)
+		return nil, fmt.Errorf("бд недоступна (ping): %w", err)
 	}
 
 	return pool, nil

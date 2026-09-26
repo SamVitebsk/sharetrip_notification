@@ -28,7 +28,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 	}
 
 	if status == fiber.StatusInternalServerError {
-		log.Printf("HTTP 500: method=%s route=%q error=%v", c.Method(), c.Route().Path, err)
+		log.Printf("Внутренняя ошибка (HTTP 500): метод=%s маршрут=%q ошибка=%v", c.Method(), c.Route().Path, err)
 	}
 
 	return c.Status(status).JSON(openapi.ErrorResponse{

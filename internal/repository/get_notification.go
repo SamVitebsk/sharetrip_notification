@@ -27,7 +27,7 @@ func (p *Postgres) FindByID(ctx context.Context, id uuid.UUID) (domain.Notificat
 	)
 
 	if err != nil {
-		return domain.Notification{}, fmt.Errorf("select notification: %w", mapPostgresError(err))
+		return domain.Notification{}, fmt.Errorf("ошибка получения уведомления из бд: %w", mapPostgresError(err))
 	}
 
 	return toDomainNotification(ent), nil

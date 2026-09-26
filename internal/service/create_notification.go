@@ -38,8 +38,11 @@ func (s *Service) Create(ctx context.Context, request CreateNotificationRequest)
 		return CreateNotificationResponse{}, mapCreateError(err)
 	}
 
-	if err := s.repo.Save(ctx, response.Notification); err != nil {
-		return CreateNotificationResponse{}, fmt.Errorf("save notification: %w", err)
+	err = s.txRunner(ctx, func(ctx context.Context, tx RepositoryTx) error {
+		return tx.Save(ctx, response.Notification)
+	})
+	if err != nil {
+		return CreateNotificationResponse{}, fmt.Errorf("ошибка сохранения уведомления: %w", err)
 	}
 
 	return toCreateNotificationResponse(response.Notification), nil

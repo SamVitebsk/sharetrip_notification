@@ -20,7 +20,7 @@ type GetNotificationResponse struct {
 func (s *Service) GetNotification(ctx context.Context, id uuid.UUID) (GetNotificationResponse, error) {
 	n, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return GetNotificationResponse{}, fmt.Errorf("find notification: %w", err)
+		return GetNotificationResponse{}, fmt.Errorf("ошибка поиска уведомления: %w", err)
 	}
 
 	return toGetNotificationResponse(n), nil

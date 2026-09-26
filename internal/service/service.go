@@ -5,12 +5,16 @@ import (
 )
 
 type Service struct {
-	repo NotificationRepository
+	repo     NotificationRepository
+	txRunner TxRunner
 }
 
-func New(repo NotificationRepository) (*Service, error) {
+func New(repo NotificationRepository, txRunner TxRunner) (*Service, error) {
 	if repo == nil {
 		return nil, errors.New("notification repository is required")
 	}
-	return &Service{repo: repo}, nil
+	if txRunner == nil {
+		return nil, errors.New("txRunner is required")
+	}
+	return &Service{repo: repo, txRunner: txRunner}, nil
 }
