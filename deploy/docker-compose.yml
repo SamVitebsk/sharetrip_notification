@@ -5,11 +5,11 @@ services:
     image: postgres:16
     container_name: sharetrip-notification-postgres
     environment:
-      POSTGRES_DB: ${PGDATABASE:?Set PGDATABASE in .env}
-      POSTGRES_USER: ${PGUSER:?Set PGUSER in .env}
-      POSTGRES_PASSWORD: ${PGPASSWORD:?Set PGPASSWORD in .env}
+      POSTGRES_DB: sharetrip_notification
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
     ports:
-      - "${PGPORT:-6545}:5432"
+      - "6545:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

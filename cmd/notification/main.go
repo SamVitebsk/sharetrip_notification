@@ -44,24 +44,12 @@ func run() error {
 		return errors.New("HTTP_PORT должен быть в диапазоне от 1 до 65535")
 	}
 
-	port, err := env.Int("PGPORT", 5432)
+	cfg, err := repository.LoadConfig()
 	if err != nil {
 		return err
 	}
-	if port < 1 || port > 65535 {
-		return errors.New("PGPORT должен быть в диапазоне от 1 до 65535")
-	}
 
-	cfg := repository.Config{
-		Host:     env.String("PGHOST", "localhost"),
-		Port:     port,
-		User:     env.String("PGUSER", "postgres"),
-		Password: env.String("PGPASSWORD", "postgres"),
-		DBName:   env.String("PGDATABASE", "notification_db"),
-		SSLMode:  env.String("PGSSLMODE", "disable"),
-	}
-
-	pool, err := repository.ConnectPostgres(ctx, cfg.DSN())
+	pool, err := repository.ConnectPostgres(ctx, cfg.DSN)
 	if err != nil {
 		return errors.New("не удалось подключиться к PostgreSQL: проверьте PG*-настройки и доступность БД")
 	}
@@ -96,9 +84,12 @@ func run() error {
 
 	api.RegisterRoutes(app, server)
 
-	kafkaCfg := kafka.LoadConfig()
+	kafkaCfg, err := kafka.LoadConfig()
+	if err != nil {
+		return err
+	}
 	consumer := kafka.NewConsumer(kafkaCfg.Brokers, kafkaCfg.Topic, kafkaCfg.GroupID)
-	defer consumer.Close()
+	defer func() { _ = consumer.Close() }()
 
 	g, gCtx := errgroup.WithContext(ctx)
 

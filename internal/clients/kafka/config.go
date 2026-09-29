@@ -1,7 +1,8 @@
 package kafka
 
 import (
-	"sharetrip_notification/internal/env"
+	"fmt"
+	"os"
 )
 
 type Config struct {
@@ -10,10 +11,25 @@ type Config struct {
 	Topic   string
 }
 
-func LoadConfig() Config {
-	return Config{
-		Brokers: env.StringSlice("KAFKA_BROKERS", []string{"localhost:29092"}),
-		GroupID: env.String("KAFKA_GROUP_ID", "notification-service"),
-		Topic:   env.String("KAFKA_TOPIC", "trip.events"),
+func LoadConfig() (Config, error) {
+	brokers := os.Getenv("KAFKA_BROKERS")
+	if brokers == "" {
+		return Config{}, fmt.Errorf("KAFKA_BROKERS is required")
 	}
+
+	groupID := os.Getenv("KAFKA_GROUP_ID")
+	if groupID == "" {
+		return Config{}, fmt.Errorf("KAFKA_GROUP_ID is required")
+	}
+
+	topic := os.Getenv("KAFKA_TOPIC")
+	if topic == "" {
+		topic = "trip-events"
+	}
+
+	return Config{
+		Brokers: []string{brokers},
+		GroupID: groupID,
+		Topic:   topic,
+	}, nil
 }

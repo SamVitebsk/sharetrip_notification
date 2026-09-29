@@ -1,17 +1,21 @@
 package repository
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type Config struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
+	DSN string
 }
 
-func (c Config) DSN() string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		c.Host, c.Port, c.User, c.Password, c.DBName, c.SSLMode)
+func LoadConfig() (Config, error) {
+	dsn := os.Getenv("DATABASE_DSN")
+	if dsn == "" {
+		return Config{}, fmt.Errorf("DATABASE_DSN is required")
+	}
+
+	return Config{
+		DSN: dsn,
+	}, nil
 }
